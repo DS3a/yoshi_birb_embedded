@@ -13,8 +13,8 @@ debug = true # Symbols are nice and they don't increase the size on Flash
 opt-level = "z"
 
 [lib]
-name = "wifi_ap_lib"
-path = "src/wifi_ap_lib.rs"
+name = "utils"
+path = "src/utils.rs"
 
 [features]
 pio = ["esp-idf-sys/pio"]
@@ -25,7 +25,10 @@ heapless = "*"
 enumset = "*"
 esp-idf-svc = "*"
 embedded-svc = "*"
-
+esp-idf-hal = "*"
+embedded-hal = "*"
+serde = "*"
+serde_json = "1.0"
 
 [build-dependencies]
 embuild = "0.30"
