@@ -1,14 +1,17 @@
 use esp_idf_sys as _;
 
+// use embedded_hal::pwm::blocking::PwmPin;
+use esp_idf_hal::ledc::{config::TimerConfig, Channel, Timer};
+use esp_idf_hal::peripherals::Peripherals;
+use esp_idf_hal::prelude::*;
+use serde_json;
 use std::io::{Read, Write};
-use std::str::from_utf8; // find a way to send binary data alone
 use std::net::{Ipv4Addr, TcpStream};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use utils::wifi_ap_lib;
 use utils::wifi_ap_lib::Wifi;
-use utils::yoshi_msgs;
-use serde_json;
+use yoshi_msgs::yoshi_msgs;
 
 static HOST_ADDRESS: &str = "11.42.0.2:3000";
 
@@ -38,7 +41,7 @@ fn main() {
                         stream.write(msg).unwrap();
                         println!("Sent Hello, awaiting reply...");
 
-                        let mut data = [0 as u8; 500]; // using 6 byte buffer
+                        let mut data = [0 as u8; 500];
                         match stream.read(&mut data) {
                             Ok(_) => {
                                     println!("Received data");
@@ -59,6 +62,18 @@ fn main() {
     });
 
     loop {
+        /*
+        pin7 -> GPIO26
+        pin8 -> GPIO25
+        pin9 -> GPIO33
+        pin10 -> GPIO32
+         */
+        let peripherals = Peripherals::take().unwrap();
+        let config = TimerConfig::default().frequency(25.kHz().into());
+        let timer = Timer::new(peripherals.ledc.timer0, &config).unwrap();
+        let mut channel = Channel::new(peripherals.ledc.channel0, &timer, peripherals.pins.gpio26).unwrap();
 
+        let max_duty = channel.get_max_duty();
+        channel.set_duty(max_duty * 3 / 4).unwrap();
     }
 }
