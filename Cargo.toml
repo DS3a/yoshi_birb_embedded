@@ -29,6 +29,7 @@ esp-idf-hal = "*"
 embedded-hal = "*"
 serde = "*"
 serde_json = "1.0"
+yoshi_msgs = {git = "https://github.com/DS3a/yoshi_msgs.git"}
 
 [build-dependencies]
 embuild = "0.30"
