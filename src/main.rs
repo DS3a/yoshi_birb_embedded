@@ -69,12 +69,16 @@ fn main() {
         let timer = Timer::new(peripherals.ledc.timer0, &config).unwrap();
         let mut channel = Channel::new(peripherals.ledc.channel0, &timer, peripherals.pins.gpio26).unwrap();
         let mut pin_9 = Channel::new(peripherals.ledc.channel1, &timer, peripherals.pins.gpio25).unwrap();
+        let mut pin_10 = Channel::new(peripherals.ledc.channel2, &timer, peripherals.pins.gpio33).unwrap();
+        let mut pin_11 = Channel::new(peripherals.ledc.channel3, &timer, peripherals.pins.gpio32).unwrap();
 
         let max_duty = channel.get_max_duty();
-        for numerator in [0, 1, 2, 3, 4, 5, 6, 10, 20, 30, 34, 50].iter().cycle() {
+        for numerator in [10, 20, 30, 40, 50].iter().cycle() {
             channel.set_duty(max_duty * numerator / 50);
-            pin_9.set_duty(max_duty * (50-numerator)/50);
-            thread::sleep(std::time::Duration::from_millis(200));
+            pin_9.set_duty(max_duty * (numerator)/50);
+            pin_10.set_duty(max_duty * numerator / 50);
+            pin_11.set_duty(max_duty * numerator / 50);
+            thread::sleep(std::time::Duration::from_millis(2000));
         }
 
     }
