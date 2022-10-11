@@ -20,11 +20,12 @@ static HOST_ADDRESS: &str = "11.42.0.2:3000";
 fn main() {
     esp_idf_sys::link_patches();
 
-    let is_connected_handler: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
-    let conf = wifi_ap_lib::generate_conf("yoshibirb_ap", "qwertyuiop", Ipv4Addr::new(11, 42, 0, 1));
+    let is_connected_handler: Arc<Mutex<bool>> = Arc::new(Mutex::new(false)); let conf = wifi_ap_lib::generate_conf("yoshibirb_ap", "qwertyuiop", Ipv4Addr::new(11, 42, 0, 1));
     let mut wifi_handler = wifi_ap_lib::generate_handler();
     wifi_handler.set_configuration(&conf).unwrap();
 
+
+    // TODO make global structs for msg_for_esp and msg_from_esp
     let tcp_thread_is_connected_handler = Arc::clone(&is_connected_handler);
     thread::spawn(move || {
         loop {
@@ -39,6 +40,7 @@ fn main() {
                     let j = serde_json::to_string(&msg_from_esp).unwrap();
                     loop {
                         *tcp_thread_is_connected_handler.lock().unwrap() = true;
+                        // TODO update msg_from_esp based on imu data before sending
                         let msg = j.as_bytes();
                         stream.write(msg).unwrap();
                         println!("Sent Hello, awaiting reply...");
@@ -46,6 +48,8 @@ fn main() {
                         let mut data = [0 as u8; 500]; // using 6 byte buffer
                         match stream.read(&mut data) {
                             Ok(_) => {
+                                // TODO data should be msg_for_esp
+                                // TODO change the global object accordingly
                                     println!("Received data");
                             },
                             Err(e) => {
@@ -64,6 +68,7 @@ fn main() {
     });
 
     loop {
+        // TODO update duty cycles based on msg_for_esp
         let peripherals = Peripherals::take().unwrap();
         let config = TimerConfig::default().frequency(25.kHz().into());
         let timer = Timer::new(peripherals.ledc.timer0, &config).unwrap();
